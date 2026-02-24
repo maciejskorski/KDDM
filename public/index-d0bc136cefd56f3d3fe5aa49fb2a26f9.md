@@ -1,0 +1,7 @@
+# Data Mining and Knowledge Discovery
+<!-- ```{tableofcontents}
+``` -->
+
+## About
+
+ecture  at the university of luxembourg fall 2026

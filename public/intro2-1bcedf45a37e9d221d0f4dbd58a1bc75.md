@@ -1,0 +1,904 @@
+---
+kernelspec:
+  name: python3
+  display_name: Python 3
+  language: python
+---
+
+# Know Thy Data
+
+Understanding data structure, characteristics, and patterns is foundational for effective analysis.
+
+---
+
+## Data Objects & Attributes
+
+**Data objects** represent entities (customers, patients, transactions) described by **attributes** (features, dimensions, variables).
+
+```{note}
+An **attribute vector** is the set of attributes describing a single object.
+```
+
+---
+
+## Attribute Types
+
+### Nominal (Categorical)
+
+Unordered categories without meaningful sequence.
+
+**Examples**: Hair color, marital status, product ID  
+**Operations**: Equality/inequality only  
+**Central tendency**: Mode
+
+````{exercise}
+What is the most popular iPhone model among a sample of users?
+
+```{code-cell} python3
+import pandas as pd
+
+iphone_models = ['iPhone 15', 'iPhone 16', 'iPhone 15', 'iPhone 17', 'iPhone 15', 'iPhone 16']
+s = pd.Series(iphone_models)
+print(s.mode().values)
+```
+````
+
+### Binary
+
+Two states (0 or 1).
+
+**Symmetric**: Both states equally important (e.g., biological sex)  
+**Asymmetric**: One state more significant (e.g., disease test: positive=1, negative=0)
+
+```{tip}
+Convention: Code the rarer/more important outcome as 1.
+```
+
+### Ordinal
+
+Meaningful order with unknown magnitude between values.
+
+**Examples**: Drink size (small < medium < large), satisfaction rating (1–5), academic grade
+
+**Central tendency**: Median, Mode
+
+```{code-cell} python3
+import pandas as pd
+
+satisfaction = pd.Series([2, 4, 2, 5, 4, 4, 3, 5, 4, 2, 2])
+print(f"Median: {satisfaction.median()}")
+print(f"Mode:   {satisfaction.mode().values}")
+```
+
+### Numeric
+
+#### Interval-Scaled
+Equal-size units, **no true zero**.
+
+**Examples**: Temperature (°C, °F), calendar dates  
+**Operations**: +, −, mean, median  
+**Limitation**: Ratios are meaningless — 20 °C is NOT twice as warm as 10 °C
+
+#### Ratio-Scaled
+Has an **inherent zero-point**.
+
+**Examples**: Weight, height, age, temperature (K), monetary amounts  
+**Operations**: All arithmetic including ratios — 20 kg IS twice as heavy as 10 kg
+
+```{important}
+**Key distinction**: Can you meaningfully say "twice as much"?
+- Yes → Ratio-scaled
+- No → Interval-scaled
+```
+
+### Discrete vs Continuous
+
+**Discrete**: Finite or countably infinite values (zip codes, number of children)  
+**Continuous**: Real-valued, typically floating-point (temperature, height)
+
+---
+
+## Central Tendency
+
+### Mean (Arithmetic Average)
+
+$$\bar{x} = \frac{\sum_{i=1}^{N} x_i}{N}$$
+
+**Weighted mean**:
+$$\bar{x} = \frac{\sum_{i=1}^{N} w_i x_i}{\sum_{i=1}^{N} w_i}$$
+
+**Trimmed mean**: Remove top/bottom percentiles before computing — reduces outlier impact.
+
+```{warning}
+**Sensitive to outliers.** A single extreme value can dramatically shift the (untrimmed) mean.
+```
+
+### Median
+
+Middle value in sorted data.
+- **N odd**: exact middle value
+- **N even**: average of two middle values
+
+**Robust to outliers** — preferred for skewed distributions.
+
+**Approximating from grouped data** (interpolation formula):
+
+$$\text{median} \approx b_{k-1} + \frac{\frac{n}{2} - F_{k-1}}{f_k} \times (b_k - b_{k-1})$$
+
+where the $k$-th bin $(b_{k-1}, b_k)$ is the first bin where cumulative frequency $F_k = \sum_{i \leq k} f_i$ reaches $n/2$, and $f_k$ is its count. Assumes uniform distribution within the bin.
+
+:::{admonition} Example — US Developer Salaries (StackOverflow 2023)
+:class: note
+
+| Salary bin (USD) | Count | Cumulative |
+|---|---|---|
+| Under \$50,000 | 108 | 108 |
+| \$50,000 – \$74,999 | 397 | 505 |
+| \$75,000 – \$99,999 | 801 | 1,306 |
+| \$100,000 – \$124,999 | 1,184 | 2,490 |
+| **\$125,000 – \$149,999** | **1,328** | **3,818** |
+| \$150,000 – \$174,999 | 1,213 | 5,031 |
+| \$175,000 – \$199,999 | 859 | 5,890 |
+| \$200,000 – \$249,999 | 815 | 6,705 |
+| \$250,000 – \$299,999 | 296 | 7,001 |
+| \$300,000+ | 217 | 7,218 |
+
+$n/2 = 3{,}609$ falls in **\$125,000–\$150,000** ($F_{k-1} = 2{,}490,\ F_k = 3{,}818$):
+
+$$\text{median} \approx 125{,}000 + \frac{3{,}609 - 2{,}490}{1{,}328} \times 25{,}000 \approx \textbf{\$146{,}065}$$
+
+```{code-cell} python3
+import numpy as np
+
+bins   = [(0,50000),(50000,75000),(75000,100000),(100000,125000),
+          (125000,150000),(150000,175000),(175000,200000),
+          (200000,250000),(250000,300000),(300000,400000)]
+counts = [108, 397, 801, 1184, 1328, 1213, 859, 815, 296, 217]
+
+cumsum = np.cumsum(counts)
+n      = cumsum[-1]
+i      = np.searchsorted(cumsum, n / 2)          # first bin where F_k >= n/2
+b_left, b_right = bins[i]
+f_prev = cumsum[i-1] if i > 0 else 0
+
+median = b_left + (n/2 - f_prev) / counts[i] * (b_right - b_left)
+print(f"Estimated median: ${median:,.0f}")
+```
+:::
+
+### Mode
+
+Most frequently occurring value. Works for all attribute types. Data can be unimodal, bimodal, or multimodal.
+
+### Midrange
+
+$$\text{Midrange} = \frac{\max + \min}{2}$$
+
+Highly sensitive to outliers; rarely used for skewed data.
+
+```{code-cell} python3
+import numpy as np
+from scipy import stats
+
+salary = [30, 36, 47, 50, 52, 52, 56, 60, 63, 70, 70, 110]
+
+print(f"Mean:     ${np.mean(salary):.1f}k")
+print(f"Median:   ${np.median(salary):.1f}k")
+print(f"Mode:     ${stats.mode(salary, keepdims=True).mode[0]}k")
+print(f"Midrange: ${(min(salary) + max(salary)) / 2:.1f}k")
+```
+
+---
+
+## Distribution Shape
+
+| Shape | Relationship | Tail Direction |
+|---|---|---|
+| **Symmetric** | Mean = Median = Mode | Balanced |
+| **Positively skewed** | Mode < Median < Mean | Right |
+| **Negatively skewed** | Mean < Median < Mode | Left |
+
+**Empirical relation** (moderately skewed data):
+$$\text{mean} - \text{mode} \approx 3 \times (\text{mean} - \text{median})$$
+
+```{code-cell} python3
+%matplotlib inline
+import numpy as np
+import matplotlib.pyplot as plt
+
+bins   = [(0,50000),(50000,75000),(75000,100000),(100000,125000),
+          (125000,150000),(150000,175000),(175000,200000),
+          (200000,250000),(250000,300000),(300000,400000)]
+counts = [108, 397, 801, 1184, 1328, 1213, 859, 815, 296, 217]
+
+edges     = np.array([b[0] for b in bins] + [bins[-1][1]])
+midpoints = (edges[:-1] + edges[1:]) / 2
+mean_val  = np.average(midpoints, weights=counts)
+median_val = 146_065
+
+fig, ax = plt.subplots(figsize=(10, 4))
+ax.hist(edges[:-1], edges, weights=counts, color='steelblue', edgecolor='white')
+ax.axvline(mean_val,   color='#e74c3c', lw=2,      label=f'Mean   ${mean_val:,.0f}')
+ax.axvline(median_val, color='black',   lw=2, ls='--', label=f'Median ${median_val:,}')
+ax.set_xticks(edges)
+ax.set_xticklabels([f'${x/1000:.0f}k' for x in edges], rotation=45, ha='right')
+ax.set_xlabel('Annual Salary (USD)')
+ax.set_ylabel('Frequency')
+ax.set_title('US Developer Salaries — StackOverflow 2023 (positively skewed)')
+ax.legend()
+plt.tight_layout()
+plt.savefig('./skewness.png', dpi=150, bbox_inches='tight')
+plt.show()
+```
+
+```{figure} ./skewness.png
+:align: left
+:height: 300px
+US developer salary distribution. Mean is pulled right by high earners; median is more representative.
+```
+
+---
+
+## Dispersion Measures
+
+### Range
+
+$$\text{Range} = \max - \min$$
+
+### Quantiles & Quartiles
+
+**Quantiles**: Points dividing data into equal-sized consecutive sets.
+
+**Quartiles** split data into 4 parts:
+- **Q₁** (25th percentile)
+- **Q₂** (50th percentile) = Median
+- **Q₃** (75th percentile)
+
+**Interquartile Range**:
+$$\text{IQR} = Q_3 - Q_1$$
+
+**Outlier detection rule**: Flag values beyond $Q_1 - 1.5 \times \text{IQR}$ or $Q_3 + 1.5 \times \text{IQR}$.
+
+:::{admonition} Example — Network Packet Latency (ms)
+:class: tip
+
+| Latency bin (ms) | Count $f_k$ | Cumulative $F_k$ |
+|---|---|---|
+| 0–9 | 120 | 120 |
+| 10–19 | 280 | 400 |
+| **20–29** | **350** | **750** |
+| 30–39 | 410 | 1,160 |
+| **40–49** | **390** | **1,550** |
+| 50–59 | 280 | 1,830 |
+| 60–69 | 110 | 1,940 |
+| 70–79 | 45 | 1,985 |
+| 90+ | 15 | 2,000 |
+
+$n = 2{,}000$, so $Q_1$ at rank $500$, $Q_3$ at rank $1{,}500$.
+
+**$Q_1$**: rank 500 falls in **20–29** ($F_{i-1}=400,\ f_k=350$):
+$$Q_1 = 20 + \frac{500 - 400}{350} \times 10 \approx 22.9 \text{ ms}$$
+
+**$Q_3$**: rank 1500 falls in **40–49** ($F_{i-1}=1{,}160,\ f_k=390$):
+$$Q_3 = 40 + \frac{1{,}500 - 1{,}160}{390} \times 10 \approx 48.7 \text{ ms}$$
+
+$$\text{IQR} = 48.7 - 22.9 = 25.8 \text{ ms}$$
+
+**Fences**:
+$$\text{upper} = 48.7 + 1.5 \times 25.8 = 87.4 \text{ ms}$$
+$$\text{lower} = 22.9 - 1.5 \times 25.8 = -15.8 \text{ ms} \quad \text{(no lower outliers)}$$
+
+All 15 packets in the **90+ ms** bin exceed the upper fence and are flagged as anomalies — likely network congestion or routing failures.
+
+```{code-cell} python3
+import numpy as np
+
+bins_lat   = [(0,10),(10,20),(20,30),(30,40),(40,50),(50,60),(60,70),(70,80),(90,200)]
+counts_lat = [120, 280, 350, 410, 390, 280, 110, 45, 15]
+
+cumsum = np.cumsum(counts_lat)
+n = cumsum[-1]  # 2000
+
+def interpolate_quantile(rank, bins, counts, cumsum):
+    i = np.searchsorted(cumsum, rank)
+    b_left, b_right = bins[i]
+    f_prev = cumsum[i-1] if i > 0 else 0
+    return b_left + (rank - f_prev) / counts[i] * (b_right - b_left)
+
+Q1 = interpolate_quantile(n * 0.25, bins_lat, counts_lat, cumsum)
+Q3 = interpolate_quantile(n * 0.75, bins_lat, counts_lat, cumsum)
+IQR = Q3 - Q1
+
+print(f"Q1  = {Q1:.1f} ms")
+print(f"Q3  = {Q3:.1f} ms")
+print(f"IQR = {IQR:.1f} ms")
+print(f"Upper fence = {Q3 + 1.5*IQR:.1f} ms")
+print(f"Lower fence = {Q1 - 1.5*IQR:.1f} ms")
+```
+:::
+
+### Five-Number Summary
+
+Minimum, Q₁, Median, Q₃, Maximum — visualized as a **boxplot**:
+- Box spans Q₁ to Q₃ (IQR)
+- Line inside box: Median
+- Whiskers extend to min/max within 1.5×IQR
+- Points beyond whiskers: Outliers
+
+```{code-cell} python3
+from sklearn.datasets import fetch_openml
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+df = fetch_openml('adult', version=2, as_frame=True).frame
+df['edu_group'] = df['education-num'].apply(
+    lambda x: 'High School or less' if x <= 9 else ('Some College' if x <= 13 else 'Graduate')
+)
+
+fig, ax = plt.subplots(figsize=(9, 4))
+sns.boxplot(data=df, x='edu_group', y='hours-per-week', hue='sex',
+            order=['High School or less', 'Some College', 'Graduate'],
+            medianprops=dict(color='white', linewidth=1.5), ax=ax)
+ax.set_ylabel('Hours / Week')
+ax.set_xlabel('Education Level')
+ax.set_title('Working Hours by Education & Sex (Adult Census)')
+plt.tight_layout()
+plt.show()
+```
+
+### Variance & Standard Deviation
+
+**Population variance**:
+$$\sigma^2 = \frac{1}{N}\sum_{i=1}^{N}(x_i - \bar{x})^2 \qquad \text{(sample: divide by } N-1\text{)}$$
+
+**Standard deviation**: $\sigma = \sqrt{\sigma^2}$
+
+Properties: σ = 0 only when all values are identical. Always interpret alongside the mean.
+
+```{important}
+**Chebyshev's inequality**: At least $\left(1 - \frac{1}{k^2}\right) \times 100\%$ of observations lie within $k$ standard deviations of the mean — for *any* distribution.
+```
+
+```{code-cell} python3
+import numpy as np
+
+prices = [30, 36, 47, 50, 52, 52, 56, 60, 63, 70, 70, 110]
+print(f"Mean:     {np.mean(prices):.1f}")
+print(f"Variance: {np.var(prices, ddof=0):.1f}  (population)")
+print(f"Std Dev:  {np.std(prices, ddof=0):.1f}")
+
+# Chebyshev: at least 75% within 2 std devs
+k = 2
+mu, sigma = np.mean(prices), np.std(prices)
+within = [x for x in prices if abs(x - mu) <= k * sigma]
+print(f"\nWithin {k}σ: {len(within)}/{len(prices)} = {len(within)/len(prices):.0%}  (Chebyshev bound ≥ {1-1/k**2:.0%})")
+```
+
+---
+
+## Graphic Displays
+
+### Quantile Plot
+
+Plots all data points against their percentile rank $f_i = \frac{i - 0.5}{N}$.
+
+- **x-axis**: f-value (percentile rank)
+- **y-axis**: Data value
+
+Reveals the full distribution, quartiles, and outliers at a glance.
+
+```{code-cell} python3
+import numpy as np
+import matplotlib.pyplot as plt
+
+rng = np.random.default_rng(42)
+salaries = np.sort(rng.lognormal(mean=11.5, sigma=0.5, size=200))
+N = len(salaries)
+f = (np.arange(1, N+1) - 0.5) / N
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.plot(f, salaries / 1000, 'o', markersize=3, alpha=0.6)
+ax.set_xlabel('f-value (percentile rank)')
+ax.set_ylabel('Salary ($k)')
+ax.set_title('Quantile Plot — Simulated Salaries')
+for q, label in zip([0.25, 0.5, 0.75], ['Q1', 'Q2', 'Q3']):
+    ax.axvline(q, color='red', lw=0.8, ls='--', alpha=0.7)
+    ax.text(q + 0.01, salaries[-1] / 1000 * 0.95, label, color='red', fontsize=8)
+plt.tight_layout()
+plt.show()
+```
+
+### Quantile-Quantile (Q-Q) Plot
+
+Compares quantiles of two distributions — points along the diagonal mean similar distributions; deviations reveal shifts or scale differences.
+
+**Use cases**: compare groups, detect distribution shifts, test distribution shape (e.g. normality).
+
+```{code-cell} python3
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_openml
+
+df = fetch_openml('heart-statlog', as_frame=True).frame
+
+bp_no  = df[df['class']=='absent']['resting_blood_pressure'].dropna().astype(float)
+bp_yes = df[df['class']=='present']['resting_blood_pressure'].dropna().astype(float)
+
+percentiles = np.linspace(0.01, 0.99, 100)
+q_no, q_yes = np.quantile(bp_no, percentiles), np.quantile(bp_yes, percentiles)
+
+fig, ax = plt.subplots(figsize=(5, 5))
+ax.scatter(q_no, q_yes, alpha=0.6, s=20)
+ref = [min(q_no.min(), q_yes.min()), max(q_no.max(), q_yes.max())]
+ax.plot(ref, ref, 'r--', label='Equal distributions')
+ax.set_xlabel('No Disease Quantiles (mmHg)')
+ax.set_ylabel('Disease Quantiles (mmHg)')
+ax.set_title('Resting Blood Pressure')
+ax.legend()
+plt.tight_layout()
+plt.show()
+```
+
+### Histogram
+
+Estimates distribution of numeric data.  equal-width bins by default.
+
+```{code-cell} python3
+import seaborn as sns
+from sklearn.datasets import fetch_openml
+
+df = fetch_openml('adult', version=2, as_frame=True).frame
+
+fig = sns.histplot(data=df,y='age',hue='race',stat='percent', common_norm=False, binwidth=10,multiple='dodge')
+_ = fig.set_title("Age Distribution (Adult Census)")
+```
+
+```{code-cell} python3
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_openml
+
+df = fetch_openml('adult', version=2, as_frame=True).frame.dropna()
+df['age'] = df['age'].astype(float)
+
+white = df[df['race'] == 'White']['age']
+black = df[df['race'] == 'Black']['age']
+
+percentiles = np.linspace(0.01, 0.99, 100)
+q_white = np.quantile(white, percentiles)
+q_black = np.quantile(black, percentiles)
+
+fig, ax = plt.subplots(figsize=(5, 5))
+ax.scatter(q_white, q_black, s=15, alpha=0.7)
+ref = [min(q_white.min(), q_black.min()), max(q_white.max(), q_black.max())]
+ax.plot(ref, ref, 'r--', label='Equal distributions')
+ax.set_xlabel('White — Age Quantiles')
+ax.set_ylabel('Black — Age Quantiles')
+ax.set_title('Q-Q Plot: Age Distribution by Race')
+ax.legend()
+plt.tight_layout()
+plt.show()
+```
+
+### Scatter Plot
+
+Bivariate visualization — reveals correlation, clusters, and outliers. Add a 3rd dimension via color/shape, 4th via size.
+
+```{code-cell} python3
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_openml
+
+df = fetch_openml('adult', version=2, as_frame=True).frame.dropna()
+df['age']            = df['age'].astype(float)
+df['hours-per-week'] = df['hours-per-week'].astype(float)
+income_col = 'class'  # OpenML adult v2 uses 'class', not 'income'
+
+fig, ax = plt.subplots(figsize=(7, 4))
+for label, color in [('<=50K', 'steelblue'), ('>50K', 'tomato')]:
+    sub = df[df[income_col] == label]
+    ax.scatter(sub['age'], sub['hours-per-week'],
+               c=color, alpha=0.15, s=8, label=f'Income {label}')
+ax.set_xlabel('Age')
+ax.set_ylabel('Hours / Week')
+ax.set_title('Age vs Working Hours by Income Class')
+ax.legend(markerscale=3)
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+### Correlation
+
+Scatter plots suggest correlation visually; compute it numerically with:
+
+**Pearson's r** — linear correlation for numeric data:
+$$r = \frac{\sum(x_i - \bar{x})(y_i - \bar{y})}{N \cdot \sigma_x \sigma_y} \in [-1, 1]$$
+
+**Spearman's ρ** — rank-based, robust to outliers and monotone non-linear relationships:
+
+$$\rho = 1 - \frac{6 \sum d_i^2}{n(n^2 - 1)}$$
+
+where $d_i = \text{rank}(x_i) - \text{rank}(y_i)$, rank is the position in sorted order (1 = smallest).
+
+```{code-cell} python3
+import seaborn as sns
+from scipy import stats
+
+titanic = sns.load_dataset('titanic')[['pclass', 'fare']].dropna()
+
+r,   _ = stats.pearsonr(titanic['pclass'], titanic['fare'])
+rho, _ = stats.spearmanr(titanic['pclass'], titanic['fare'])
+
+ax = sns.boxplot(data=titanic, x='pclass', y='fare')
+_ = ax.set(yscale='log', xlabel='Passenger Class (ordinal)', ylabel='Fare (£)',
+       title=f'Pearson r = {r:.2f}  |  Spearman ρ = {rho:.2f}')
+```
+```{note}
+Use **Pearson** for linear relationships on continuous data; **Spearman** when data is ordinal, skewed, or contains outliers.
+```
+
+## Advanced Visualization
+
+### Pixel-Oriented Techniques
+
+Map each dimension value to a colored pixel — $m$ dimensions → $m$ windows. Pixel color reflects value intensity. **Space-filling curves** (Hilbert, Z-curve) keep adjacent values spatially close.
+
+### Geometric Projection
+
+**Scatter plot matrix**: $n \times n$ grid showing all pairwise 2D projections.
+
+**Parallel coordinates**: $n$ vertical axes, each data record drawn as a polygonal line connecting its values.
+
+```{code-cell} python3
+from sklearn.datasets import load_iris
+import pandas as pd
+import matplotlib.pyplot as plt
+from pandas.plotting import parallel_coordinates
+
+iris = load_iris(as_frame=True)
+df_iris = pd.concat([iris.data, iris.target.map(dict(enumerate(iris.target_names)))
+                     .rename('species')], axis=1)
+
+fig, ax = plt.subplots(figsize=(9, 4))
+parallel_coordinates(df_iris, class_column='species', alpha=0.3, ax=ax)
+ax.set_title('Iris — Parallel Coordinates')
+plt.tight_layout()
+plt.show()
+```
+
+```{warning}
+Parallel coordinates suffer from visual clutter with large datasets. Consider sampling or interactive tools (Plotly, Altair).
+```
+
+### Icon-Based
+
+**Chernoff faces**: Map up to 18 dimensions to facial features (eye size, nose shape, mouth curve). Leverages innate human facial recognition — but feature importance varies perceptually across viewers.
+
+**Stick figures**: Map dimensions to limb angles/lengths. Dense data creates recognizable texture patterns.
+
+### Hierarchical
+
+**Tree-maps**: Nested rectangles encode hierarchical data. Rectangle size/color represent values (e.g., file system usage, portfolio weights).
+
+---
+
+## Similarity & Dissimilarity
+
+### Data Structures
+
+**Data matrix** ($n \times p$): Two-mode matrix — rows = objects, columns = attributes.
+
+**Dissimilarity matrix** ($n \times n$): One-mode matrix — entry $d(i,j)$ is the dissimilarity between objects $i$ and $j$.
+
+Properties: $d(i,i) = 0$, $d(i,j) = d(j,i)$, $d(i,j) \geq 0$
+
+**Relationship**: $\text{sim}(i,j) = 1 - d(i,j)$ (for normalized dissimilarity)
+
+---
+
+### Data Matrix vs Dissimilarity Matrix
+
+**Data matrix** ($n \times p$) — two-mode, stores raw objects:
+
+$$\begin{pmatrix} x_{11} & \cdots & x_{1p} \\ \vdots & & \vdots \\ x_{n1} & \cdots & x_{np} \end{pmatrix}$$
+
+**Dissimilarity matrix** ($n \times n$) — one-mode, stores pairwise distances:
+
+$$\begin{pmatrix} 0 \\ d(2,1) & 0 \\ d(3,1) & d(3,2) & 0 \\ \vdots & & & \ddots \end{pmatrix}$$
+```{code-cell} python3
+import numpy as np
+from scipy.spatial.distance import cdist
+
+# Data matrix: 4 objects × 2 attributes
+X = np.array([[1, 2], [3, 5], [4, 1], [2, 4]])
+
+# Dissimilarity matrix (Euclidean)
+D = cdist(X, X, metric='euclidean')
+print("Dissimilarity matrix:\n", np.round(D, 2))
+```
+
+## Proximity Measures by Attribute Type
+
+### Nominal Attributes
+
+$$d(i,j) = \frac{p - m}{p}$$
+
+where $p$ = total attributes, $m$ = number of matches. Range: [0, 1].
+
+```{code-cell} python3
+def nominal_dissimilarity(obj1, obj2):
+    p = len(obj1)
+    m = sum(a == b for a, b in zip(obj1, obj2))
+    return (p - m) / p
+
+a = ['red', 'large', 'round']
+b = ['red', 'small', 'round']
+print(f"d(a, b) = {nominal_dissimilarity(a, b):.2f}")   # 1 mismatch → 1/3
+```
+
+### Binary Attributes
+
+**Contingency table**:
+
+|  | j=1 | j=0 |
+|--|-----|-----|
+| **i=1** | q | r |
+| **i=0** | s | t |
+
+**Symmetric binary** (both states equally important):
+$$d(i,j) = \frac{r + s}{q + r + s + t}$$
+
+**Asymmetric binary** (ignore double-negatives):
+$$d(i,j) = \frac{r + s}{q + r + s}$$
+
+**Jaccard similarity**:
+$$\text{sim}(i,j) = \frac{q}{q + r + s}$$
+
+```{tip}
+Use asymmetric distance when both=0 is uninformative (disease symptoms, rare events, document keywords).
+```
+
+:::{admonition} Example — Gender vs Income (Adult Census)
+:class: note
+Contingency tables don't just summarize counts, they feed directly into discrepancy 
+tests such as chi-square to rigorously assess observed discrepancies. A classic example is gender and income: women are overrepresented in the 
+lower income bracket
+:class: tip
+```{code-cell} python3
+from scipy.stats import chi2_contingency
+from sklearn.datasets import fetch_openml
+
+df = fetch_openml('adult', version=2, as_frame=True).frame.dropna()
+ct = df.groupby(['sex', 'class']).size().unstack()
+ct['% >50K']     = (ct['>50K'] / ct.sum(axis=1) * 100).round(1)
+ct['% of total'] = (ct.sum(axis=1) / ct.sum().sum() * 100).round(1)
+
+chi2, p, dof, _ = chi2_contingency(ct.iloc[:, :2])
+display(ct)
+print(f"Chi-square={chi2:.1f}, df={dof}, p={p:.2e} → significant association")
+print(f"{ct.loc['Male','% >50K']}% of men vs {ct.loc['Female','% >50K']}% of women earn >50K")
+```
+:::
+
+### Numeric Attributes
+
+**Minkowski distance** (general family):
+$$d(i,j) = \left(\sum_{f=1}^{p} |x_{if} - x_{jf}|^h\right)^{1/h}$$
+
+| $h$ | Name | Also known as |
+|-----|------|---------------|
+| 1 | Manhattan | L₁, city-block |
+| 2 | Euclidean | L₂ |
+| ∞ | Supremum | L∞, Chebyshev |
+
+**Metric properties** (Euclidean & Manhattan satisfy all): non-negativity, identity, symmetry, triangle inequality.
+
+```{code-cell} python3
+from scipy.spatial.distance import euclidean, cityblock, minkowski, chebyshev
+
+x, y = [1, 2, 3], [4, 6, 5]
+print(f"Euclidean  (L2): {euclidean(x, y):.3f}")
+print(f"Manhattan  (L1): {cityblock(x, y):.3f}")
+print(f"Minkowski (h=3): {minkowski(x, y, 3):.3f}")
+print(f"Supremum  (L∞):  {chebyshev(x, y):.3f}")
+```
+
+**Weighted Euclidean** — emphasize attributes of higher importance:
+$$d(i,j) = \sqrt{\sum_{f=1}^{p} w_f (x_{if} - x_{jf})^2}$$
+
+### Ordinal Attributes
+
+Three-step process:
+1. **Rank**: Replace values with ranks $r_{if} \in \{1, \ldots, M_f\}$
+2. **Normalize**: $z_{if} = \frac{r_{if} - 1}{M_f - 1}$ → maps to $[0, 1]$
+3. **Compute distance**: Apply any numeric distance on $z_{if}$
+
+```{code-cell} python3
+import numpy as np
+from sklearn.preprocessing import OrdinalEncoder
+
+satisfaction = [['fair'], ['excellent'], ['good'], ['excellent'], ['fair']]
+encoder = OrdinalEncoder(categories=[['fair', 'good', 'excellent']])
+ranks = encoder.fit_transform(satisfaction).flatten()  # 0, 2, 1, 2, 0
+
+M = 3  # number of ordered levels
+z = ranks / (M - 1)
+print(f"Ranks:      {ranks}")
+print(f"Normalized: {z}")
+
+# Euclidean distance between first two objects
+d = abs(z[0] - z[1])
+print(f"d(fair, excellent) = {d:.3f}")
+```
+
+### Mixed Attribute Types
+
+**Combined dissimilarity** — weighted average over all attributes:
+$$d(i,j) = \frac{\sum_{f=1}^{p} \delta_{ij}^{(f)}\, d_{ij}^{(f)}}{\sum_{f=1}^{p} \delta_{ij}^{(f)}}$$
+
+Indicator $\delta_{ij}^{(f)} = 0$ if either value is missing, or both are 0 for asymmetric binary.
+
+Per-attribute contribution $d_{ij}^{(f)}$:
+- **Numeric**: $\frac{|x_{if} - x_{jf}|}{\max_h x_{hf} - \min_h x_{hf}}$
+- **Nominal/Binary**: 0 if match, 1 if mismatch
+- **Ordinal**: treat as numeric after normalization
+
+```{code-cell} python3
+import pandas as pd
+import numpy as np
+
+def mixed_dissimilarity(obj1, obj2, attr_types, ranges=None):
+    """
+    attr_types : list of 'numeric' | 'nominal' | 'binary' | 'ordinal'
+    ranges     : dict {index: max-min} for numeric attributes
+    """
+    total_delta, weighted_sum = 0, 0
+    for i, (v1, v2, atype) in enumerate(zip(obj1, obj2, attr_types)):
+        if pd.isna(v1) or pd.isna(v2):
+            continue
+        if atype == 'numeric':
+            d = abs(v1 - v2) / ranges[i]
+        elif atype in ('nominal', 'binary'):
+            d = 0 if v1 == v2 else 1
+        else:  # ordinal — pre-normalized to [0,1]
+            d = abs(v1 - v2)
+        weighted_sum += d
+        total_delta  += 1
+    return weighted_sum / total_delta if total_delta > 0 else 0
+
+# Example: age (numeric), gender (binary), grade (ordinal, pre-normalized)
+obj1 = [25, 'M', 0.0]   # age=25, male, grade=fair
+obj2 = [40, 'F', 1.0]   # age=40, female, grade=excellent
+
+dist = mixed_dissimilarity(obj1, obj2,
+                           attr_types=['numeric', 'binary', 'ordinal'],
+                           ranges={0: 80})  # age range 0–80
+print(f"Mixed dissimilarity: {dist:.3f}")
+```
+
+### Vector Similarity
+
+**Cosine Similarity**
+For vectors representing data (sparse document-term frequencies, dense embeddings of text, images, and audio...), we define:
+
+$$\text{sim}(x, y) = \frac{x \cdot y}{\|x\| \cdot \|y\|}$$
+
+Range: [-1, 1] with -1 = opposite direction, 0 = orthogonal, 1 = identical direction.
+
+```{code-cell} python3
+import pandas as pd
+import numpy as np
+
+# example text documents
+emails = {
+    "spam1": "buy cheap meds free offer click now",
+    "spam2": "free prize win offer click now",
+    "ham1":  "meeting agenda attached",
+    "ham2":  "send report meeting tomorrow",
+}
+
+# build vocabulary and count words into vectors
+vocab = sorted(set(w for text in emails.values() for w in text.split()))
+def count_vec(text):
+    words = text.split()
+    return np.array([words.count(w) for w in vocab])
+
+print("term-document frequencies")
+
+vecs = {k: count_vec(v) for k, v in emails.items()}
+td_freqs= pd.DataFrame(vecs, index=vocab)
+display(td_freqs)
+
+def cosine(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+# compute cosine similarities
+
+pairs = [("spam1","spam2"), ("ham1","ham2"), ("spam1","ham1"), ("spam2","ham2")]
+scores = [cosine(td_freqs[a],td_freqs[b]) for a,b in pairs]
+sims  = pd.DataFrame(index=pairs,data=scores,columns=['cosine score'])
+display(sims)
+```
+
+**Tanimoto coefficient** — intersection over union on binary molecular fingerprints,
+where each bit represents presence/absence of a substructure:
+
+$$\text{sim}(x, y) = \frac{x \cdot y}{x \cdot x + y \cdot y - x \cdot y}$$
+
+```{code-cell} python3
+from rdkit import Chem
+from rdkit.Chem import DataStructs, rdMolDescriptors
+import pandas as pd
+
+smiles = {
+    "Aspirin":   "CC(=O)Oc1ccccc1C(=O)O",
+    "Ibuprofen": "CC(C)Cc1ccc(cc1)C(C)C(=O)O",
+    "Caffeine":  "Cn1cnc2c1c(=O)n(c(=O)n2C)C",
+    "Ethanol":   "CCO",
+}
+
+fps = {name: rdMolDescriptors.GetMorganFingerprintAsBitVect(
+           Chem.MolFromSmiles(s), radius=2)
+       for name, s in smiles.items()}
+
+names = list(fps.keys())
+tc = pd.DataFrame(
+    [[round(DataStructs.TanimotoSimilarity(fps[a], fps[b]), 3) for b in names]
+     for a in names],
+    index=names, columns=names
+)
+display(tc)
+```
+```{note}
+Aspirin and Ibuprofen score highest — both NSAIDs sharing a carboxylic acid group and 
+aromatic ring. Ethanol and Caffeine score near 0 despite both being everyday psychoactive 
+substances. Aspirin and Caffeine are combined in Excedrin for headache relief, yet their 
+Tc reveals they are structurally unrelated — a reminder that functional similarity and 
+structural similarity are very different things.
+```
+
+
+---
+
+## Summary
+
+```{important}
+### Key Takeaways
+
+1. **Match the measure to the attribute type**
+   - Nominal → Mode
+   - Ordinal → Mode, Median
+   - Numeric → Mean, Median, Mode (choose based on skewness)
+
+2. **Visualize before analyzing**
+   - Histograms & Q-Q plots reveal shape and outliers
+   - Boxplots summarize five-number summary at a glance
+   - Scatter plots expose correlation and clusters
+
+3. **Choose the right distance**
+   - Euclidean: dense continuous data
+   - Manhattan: grid-like spaces, more robust to outliers
+   - Jaccard: sparse binary data
+   - Cosine: high-dimensional sparse vectors (documents, embeddings)
+
+4. **Handle outliers strategically**
+   - Use robust measures: Median, IQR
+   - Apply trimming or winsorizing to the mean
+   - Consider transformations: log, sqrt
+
+5. **Consider data characteristics**
+   - Symmetric vs asymmetric binary
+   - Discrete vs continuous
+   - Sparse vs dense
+   - Scale differences → normalize before computing distances
+```
+
+---
+
+## Further Reading
+
+- **Statistical measures**: Tukey, *Exploratory Data Analysis* (1977)
+- **Visualization**: Tufte, *The Visual Display of Quantitative Information* (2001)
+- **Distance metrics**: Deza & Deza, *Encyclopedia of Distances* (2009)
+- **Modern Python tools**: `seaborn`, `plotly`, `altair`; `ggplot2` for R
