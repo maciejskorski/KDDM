@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>intro</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="intro_files/libs/clipboard/clipboard.min.js"></script>
+<script src="intro_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="intro_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="intro_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="intro_files/libs/quarto-html/popper.min.js"></script>
+<script src="intro_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="intro_files/libs/quarto-html/anchor.min.js"></script>
+<link href="intro_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="intro_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="intro_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="intro_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="intro_files/libs/bootstrap/bootstrap-6ede5f4cc8f12eba65c6b5505d1a6719.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="know-thy-data" class="level1">
+<h1>Know Thy Data</h1>
+<p>Understanding data structure, characteristics, and patterns is foundational for effective analysis.</p>
+<section id="data-objects-attributes" class="level2">
+<h2 class="anchored" data-anchor-id="data-objects-attributes">Data Objects &amp; Attributes</h2>
+<p><strong>Data objects</strong> represent entities (customers, patients, transactions) described by <strong>attributes</strong> (features, dimensions, variables).</p>
+<pre class="{note}"><code>An **attribute vector** is the set of attributes describing a single object.</code></pre>
+<hr>
+</section>
+<section id="attribute-types" class="level2">
+<h2 class="anchored" data-anchor-id="attribute-types">Attribute Types</h2>
+<section id="nominal-categorical" class="level3">
+<h3 class="anchored" data-anchor-id="nominal-categorical">Nominal (Categorical)</h3>
+<p>Unordered categories without meaningful sequence.</p>
+<p><strong>Examples</strong>: Hair color, marital status, product ID<br>
+<strong>Operations</strong>: Equality/inequality only<br>
+<strong>Central tendency</strong>: Mode</p>
+<p><code>agtpljgbrbo ipython # Nominal attribute example: iPhone models iphone_models = ['iPhone 15', 'iPhone 16', 'iPhone 15', 'iPhone 17', 'iPhone 15', 'iPhone 16'] import pandas as pd print(f"Most popular model: {pd.Series(iphone_models).mode()}")</code></p>
+</section>
+<section id="binary" class="level3">
+<h3 class="anchored" data-anchor-id="binary">Binary</h3>
+<p>Two states (0 or 1).</p>
+<p><strong>Symmetric</strong>: Both states equally important (e.g., gender)<br>
+<strong>Asymmetric</strong>: One state more significant (e.g., disease test: positive=1, negative=0)</p>
+<pre class="{tip}"><code>Convention: Code the rarer/more important outcome as 1.</code></pre>
+</section>
+<section id="ordinal" class="level3">
+<h3 class="anchored" data-anchor-id="ordinal">Ordinal</h3>
+<p>Meaningful order with unknown magnitude between values.</p>
+<p><strong>Examples</strong>: - Drink size: small &lt; medium &lt; large - Grade: A+, A, A-, B+… - Satisfaction: 1 (very dissatisfied) → 5 (very satisfied)</p>
+<p><strong>Central tendency</strong>: Mode, median (not mean)</p>
+<p>```python satisfaction = [3, 4, 2, 5, 4, 4, 3, 5, 4, 2] print(f”Median: {np.median(satisfaction)}“) print(f”Mode: {stats.mode(satisfaction, keepdims=True).mode[0]}“) ```</p>
+</section>
+<section id="numeric" class="level3">
+<h3 class="anchored" data-anchor-id="numeric">Numeric</h3>
+<section id="interval-scaled" class="level4">
+<h4 class="anchored" data-anchor-id="interval-scaled">Interval-Scaled</h4>
+<p>Equal-size units, <strong>no true zero</strong>.</p>
+<p><strong>Examples</strong>: Temperature (°C, °F), calendar dates<br>
+<strong>Operations</strong>: +, -, mean, median<br>
+<strong>Limitation</strong>: Cannot compute ratios (20°C is NOT 2× warmer than 10°C)</p>
+</section>
+<section id="ratio-scaled" class="level4">
+<h4 class="anchored" data-anchor-id="ratio-scaled">Ratio-Scaled</h4>
+<p>Has <strong>inherent zero-point</strong>.</p>
+<p><strong>Examples</strong>: Weight, height, age, temperature (K), monetary amounts<br>
+<strong>Operations</strong>: All arithmetic including ratios (20kg IS 2× heavier than 10kg)</p>
+<p>```{important} <strong>Key distinction</strong>: Can you meaningfully say “twice as much”? - Yes → Ratio-scaled - No → Interval-scaled ```</p>
+</section>
+</section>
+<section id="discrete-vs-continuous" class="level3">
+<h3 class="anchored" data-anchor-id="discrete-vs-continuous">Discrete vs Continuous</h3>
+<p><strong>Discrete</strong>: Finite or countably infinite values (zip codes, age in years)<br>
+<strong>Continuous</strong>: Real values, typically floating-point (temperature, height)</p>
+<hr>
+</section>
+</section>
+<section id="central-tendency" class="level2">
+<h2 class="anchored" data-anchor-id="central-tendency">Central Tendency</h2>
+<section id="mean-arithmetic-average" class="level3">
+<h3 class="anchored" data-anchor-id="mean-arithmetic-average">Mean (Arithmetic Average)</h3>
+<p><span class="math display">\[\\bar{x} = \\frac{\\sum_{i=1}^{N} x_i}{N}\]</span></p>
+<p><strong>Weighted mean</strong>: <span class="math display">\[\\bar{x} = \\frac{\\sum_{i=1}^{N} w_i x_i}{\\sum_{i=1}^{N} w_i}\]</span></p>
+<p><strong>Trimmed mean</strong>: Remove top/bottom percentiles before computing (reduces outlier impact)</p>
+<p>```{warning} <strong>Highly sensitive to outliers.</strong> One extreme value can dramatically shift the mean. ```</p>
+</section>
+<section id="median" class="level3">
+<h3 class="anchored" data-anchor-id="median">Median</h3>
+<p>Middle value in sorted data. - N odd: exact middle value - N even: average of two middle values</p>
+<p><strong>Robust to outliers</strong> — preferred for skewed distributions.</p>
+</section>
+<section id="mode" class="level3">
+<h3 class="anchored" data-anchor-id="mode">Mode</h3>
+<p>Most frequently occurring value. Works for all attribute types. Data can be: - <strong>Unimodal</strong>: One mode - <strong>Bimodal</strong>: Two modes<br>
+- <strong>Multimodal</strong>: Three or more modes</p>
+</section>
+<section id="midrange" class="level3">
+<h3 class="anchored" data-anchor-id="midrange">Midrange</h3>
+<p>Average of minimum and maximum values.</p>
+<p>```python salary = [30, 36, 47, 50, 52, 52, 56, 60, 63, 70, 70, 110] print(f”Mean: ${np.mean(salary)}k”) print(f”Median: ${np.median(salary)}k”) print(f”Mode: ${stats.mode(salary, keepdims=True).mode[0]}k”) print(f”Midrange: ${(min(salary) + max(salary))/2}k”) ```</p>
+<hr>
+</section>
+</section>
+<section id="distribution-shape" class="level2">
+<h2 class="anchored" data-anchor-id="distribution-shape">Distribution Shape</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Shape</th>
+<th>Relationship</th>
+<th>Tail Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Symmetric</strong></td>
+<td>Mean = Median = Mode</td>
+<td>Balanced</td>
+</tr>
+<tr class="even">
+<td><strong>Positively skewed</strong></td>
+<td>Mode &lt; Median &lt; Mean</td>
+<td>Right</td>
+</tr>
+<tr class="odd">
+<td><strong>Negatively skewed</strong></td>
+<td>Mean &lt; Median &lt; Mode</td>
+<td>Left</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Empirical relation</strong> (moderately skewed data): <span class="math display">\[\\text{mean} - \\text{mode} \\approx 3 \\times (\\text{mean} - \\text{median})\]</span></p>
+<hr>
+</section>
+<section id="dispersion-measures" class="level2">
+<h2 class="anchored" data-anchor-id="dispersion-measures">Dispersion Measures</h2>
+<section id="range" class="level3">
+<h3 class="anchored" data-anchor-id="range">Range</h3>
+<p><span class="math display">\[\\text{Range} = \\max - \\min\]</span></p>
+</section>
+<section id="quantiles-quartiles" class="level3">
+<h3 class="anchored" data-anchor-id="quantiles-quartiles">Quantiles &amp; Quartiles</h3>
+<p><strong>Quantiles</strong>: Points dividing data into equal-sized consecutive sets</p>
+<p><strong>Quartiles</strong> split data into 4 parts: - <strong>Q₁</strong> (25th percentile): First quartile - <strong>Q₂</strong> (50th percentile): Median - <strong>Q₃</strong> (75th percentile): Third quartile</p>
+<p><strong>Interquartile Range (IQR)</strong>: <span class="math display">\[\\text{IQR} = Q_3 - Q_1\]</span></p>
+<p><strong>Outlier detection rule</strong>: Values beyond <span class="math inline">\(Q_1 - 1.5 \\times \\text{IQR}\)</span> or <span class="math inline">\(Q_3 + 1.5 \\times \\text{IQR}\)</span></p>
+</section>
+<section id="five-number-summary" class="level3">
+<h3 class="anchored" data-anchor-id="five-number-summary">Five-Number Summary</h3>
+<p>Minimum, Q₁, Median, Q₃, Maximum</p>
+<p><strong>Boxplot</strong> visualizes this: - Box spans Q₁ to Q₃ (IQR) - Line inside box: Median - Whiskers extend to min/max (or 1.5×IQR limit) - Individual points beyond whiskers: Outliers</p>
+<p>```python import matplotlib.pyplot as plt import seaborn as sns</p>
+<p>data = [40, 43, 47, 74, 75, 78, 115, 117, 120] fig, ax = plt.subplots(figsize=(10, 6)) sns.boxplot(data=data, ax=ax) ax.set_ylabel(‘Unit Price ($)’) plt.show() ```</p>
+</section>
+<section id="variance-standard-deviation" class="level3">
+<h3 class="anchored" data-anchor-id="variance-standard-deviation">Variance &amp; Standard Deviation</h3>
+<p><strong>Variance</strong>: <span class="math display">\[\\sigma^2 = \\frac{1}{N}\\sum_{i=1}^{N}(x_i - \\bar{x})^2 = \\frac{1}{N}\\sum_{i=1}^{N}x_i^2 - \\bar{x}^2\]</span></p>
+<p><strong>Standard deviation</strong>: <span class="math display">\[\\sigma = \\sqrt{\\sigma^2}\]</span></p>
+<p>Properties: - σ = 0 only when all values identical - Measures spread about the mean - Always use with mean (not median/mode)</p>
+<p>```{important} <strong>Chebyshev’s inequality</strong>: At least <span class="math inline">\((1 - \\frac{1}{k^2}) \\times 100\\%\)</span> of observations lie within k standard deviations of the mean.</p>
+<ul>
+<li>k=2: ≥75% within 2σ</li>
+<li>k=3: ≥89% within 3σ ```</li>
+</ul>
+<p>```python prices = [30, 36, 47, 50, 52, 52, 56, 60, 63, 70, 70, 110] mean = np.mean(prices) variance = np.var(prices) std_dev = np.std(prices) print(f”Mean: {mean:.1f}, Variance: {variance:.1f}, Std Dev: {std_dev:.1f}“) ```</p>
+<hr>
+</section>
+</section>
+<section id="graphic-displays" class="level2">
+<h2 class="anchored" data-anchor-id="graphic-displays">Graphic Displays</h2>
+<section id="quantile-plot" class="level3">
+<h3 class="anchored" data-anchor-id="quantile-plot">Quantile Plot</h3>
+<p>Plots all data points against their percentile ranks.</p>
+<ul>
+<li><strong>x-axis</strong>: f-value (percentile), where <span class="math inline">\(f_i = \\frac{i - 0.5}{N}\)</span></li>
+<li><strong>y-axis</strong>: Data value</li>
+</ul>
+<p>Shows overall distribution, quartiles, and outliers.</p>
+</section>
+<section id="quantile-quantile-q-q-plot" class="level3">
+<h3 class="anchored" data-anchor-id="quantile-quantile-q-q-plot">Quantile-Quantile (Q-Q) Plot</h3>
+<p>Compares quantiles of two distributions.</p>
+<p><strong>Interpretation</strong>: - Points along diagonal → Similar distributions - Deviation from diagonal → Distribution shift</p>
+<p><strong>Use cases</strong>: Compare data sources, test theoretical distributions, identify shifts</p>
+</section>
+<section id="histogram" class="level3">
+<h3 class="anchored" data-anchor-id="histogram">Histogram</h3>
+<p>Frequency distribution for numeric data.</p>
+<ul>
+<li><strong>x-axis</strong>: Value ranges (bins/buckets)</li>
+<li><strong>y-axis</strong>: Frequency (count)</li>
+<li>Typically equal-width bins</li>
+</ul>
+<p><strong>Bar chart</strong>: Histogram variant for nominal attributes</p>
+<p>```python fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))</p>
+</section>
+</section>
+</section>
+<section id="histogram-1" class="level1">
+<h1>Histogram</h1>
+<p>ax1.hist(prices, bins=5, edgecolor=‘black’) ax1.set_xlabel(‘Unit Price ($)’) ax1.set_ylabel(‘Frequency’)</p>
+</section>
+<section id="q-q-plot" class="level1">
+<h1>Q-Q Plot</h1>
+<p>from scipy import stats stats.probplot(prices, dist=“norm”, plot=ax2) plt.show() ```</p>
+<section id="scatter-plot" class="level3">
+<h3 class="anchored" data-anchor-id="scatter-plot">Scatter Plot</h3>
+<p>Bivariate visualization using (x, y) coordinates.</p>
+<p><strong>Reveals</strong>: - <strong>Positive correlation</strong>: Points slope upward-right ↗ - <strong>Negative correlation</strong>: Points slope downward-right ↘ - <strong>No correlation</strong>: Random scatter - Clusters and outliers</p>
+<p>Can add 3rd dimension via color/shape, 4th via size.</p>
+<p>```{seealso} For correlation strength, compute Pearson’s r or Spearman’s ρ. ```</p>
+<hr>
+</section>
+<section id="advanced-visualization" class="level2">
+<h2 class="anchored" data-anchor-id="advanced-visualization">Advanced Visualization</h2>
+<section id="pixel-oriented-techniques" class="level3">
+<h3 class="anchored" data-anchor-id="pixel-oriented-techniques">Pixel-Oriented Techniques</h3>
+<p>Map each dimension value to a colored pixel.</p>
+<ul>
+<li>m dimensions → m windows</li>
+<li>Pixel color reflects value intensity</li>
+<li>Global ordering (e.g., sorted by key attribute)</li>
+</ul>
+<p><strong>Space-filling curves</strong> (Hilbert, Gray code, Z-curve) improve layouts by keeping adjacent values spatially close.</p>
+</section>
+<section id="geometric-projection" class="level3">
+<h3 class="anchored" data-anchor-id="geometric-projection">Geometric Projection</h3>
+<p><strong>Scatter plot matrix</strong>: n×n grid showing all pairwise 2D projections</p>
+<p><strong>Parallel coordinates</strong>: n parallel vertical axes, data records as polygonal lines</p>
+<p>```{warning} Parallel coordinates suffer from visual clutter with large datasets. ```</p>
+</section>
+<section id="icon-based" class="level3">
+<h3 class="anchored" data-anchor-id="icon-based">Icon-Based</h3>
+<p><strong>Chernoff faces</strong>: Map up to 18 dimensions to facial features (eyes, nose, mouth) - Leverages human facial recognition - Limitation: Feature importance varies perceptually</p>
+<p><strong>Stick figures</strong>: Map dimensions to limb angles/lengths - Dense data shows texture patterns</p>
+</section>
+<section id="hierarchical" class="level3">
+<h3 class="anchored" data-anchor-id="hierarchical">Hierarchical</h3>
+<p><strong>Tree-maps</strong>: Nested rectangles encode hierarchical data - Rectangle size/color represent values - Example: File system usage, news categories</p>
+<p><strong>Worlds-within-Worlds (n-Vision)</strong>: Nested 3D plots with interactive dimension manipulation</p>
+<hr>
+</section>
+</section>
+<section id="similarity-dissimilarity" class="level2">
+<h2 class="anchored" data-anchor-id="similarity-dissimilarity">Similarity &amp; Dissimilarity</h2>
+<section id="data-structures" class="level3">
+<h3 class="anchored" data-anchor-id="data-structures">Data Structures</h3>
+<p><strong>Data matrix</strong> (n×p): Two-mode matrix - Rows: n objects - Columns: p attributes</p>
+<p><strong>Dissimilarity matrix</strong> (n×n): One-mode matrix - Entry d(i,j): dissimilarity between objects i and j - Properties: d(i,i) = 0, d(i,j) = d(j,i), d(i,j) ≥ 0</p>
+<p><strong>Relationship</strong>: <span class="math inline">\(\\text{sim}(i,j) = 1 - d(i,j)\)</span> (for normalized dissimilarity)</p>
+<hr>
+</section>
+</section>
+<section id="proximity-measures-by-attribute-type" class="level2">
+<h2 class="anchored" data-anchor-id="proximity-measures-by-attribute-type">Proximity Measures by Attribute Type</h2>
+<section id="nominal-attributes" class="level3">
+<h3 class="anchored" data-anchor-id="nominal-attributes">Nominal Attributes</h3>
+<p><span class="math display">\[d(i,j) = \\frac{p - m}{p}\]</span></p>
+<p>where: - p = total attributes - m = number of matches</p>
+<p><strong>Range</strong>: [0, 1]<br>
+<strong>Similarity</strong>: <span class="math inline">\(\\text{sim}(i,j) = \\frac{m}{p}\)</span></p>
+<p>```python def nominal_dissimilarity(obj1, obj2): p = len(obj1) m = sum(1 for a, b in zip(obj1, obj2) if a == b) return (p - m) / p ```</p>
+</section>
+<section id="binary-attributes" class="level3">
+<h3 class="anchored" data-anchor-id="binary-attributes">Binary Attributes</h3>
+<p><strong>Contingency table</strong>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>j=1</th>
+<th>j=0</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>i=1</strong></td>
+<td>q</td>
+<td>r</td>
+<td>q+r</td>
+</tr>
+<tr class="even">
+<td><strong>i=0</strong></td>
+<td>s</td>
+<td>t</td>
+<td>s+t</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td>q+s</td>
+<td>r+t</td>
+<td>p</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Symmetric binary</strong>: <span class="math display">\[d(i,j) = \\frac{r + s}{q + r + s + t}\]</span></p>
+<p><strong>Asymmetric binary</strong> (ignore negative matches): <span class="math display">\[d(i,j) = \\frac{r + s}{q + r + s}\]</span></p>
+<p><strong>Jaccard coefficient</strong>: <span class="math display">\[\\text{sim}(i,j) = \\frac{q}{q + r + s} = 1 - d(i,j)\]</span></p>
+<p>```{tip} Use asymmetric distance when both=0 is uninformative (e.g., disease symptoms, document keywords, rare events). ```</p>
+<p><strong>Example: Smoking vs Cancer</strong></p>
+<p>```python # Contingency table # Cancer No Cancer # Smoker 50 150 # Non-smoker 10 790</p>
+<p>q, r, s, t = 50, 150, 10, 790</p>
+</section>
+</section>
+</section>
+<section id="asymmetric-dissimilarity" class="level1">
+<h1>Asymmetric dissimilarity</h1>
+<p>d_asymm = (r + s) / (q + r + s) print(f”Dissimilarity: {d_asymm:.2f}“)</p>
+</section>
+<section id="jaccard-similarity" class="level1">
+<h1>Jaccard similarity</h1>
+<p>jaccard = q / (q + r + s) print(f”Jaccard: {jaccard:.2f}“)</p>
+</section>
+<section id="chi-square-test" class="level1">
+<h1>Chi-square test</h1>
+<p>from scipy.stats import chi2_contingency observed = [[q, r], [s, t]] chi2, p_value, dof, expected = chi2_contingency(observed) print(f”Chi-square: {chi2:.2f}, p-value: {p_value:.4f}“) ```</p>
+<section id="numeric-attributes" class="level3">
+<h3 class="anchored" data-anchor-id="numeric-attributes">Numeric Attributes</h3>
+<p><strong>Euclidean distance</strong> (L₂ norm): <span class="math display">\[d(i,j) = \\sqrt{\\sum_{f=1}^{p}(x_{if} - x_{jf})^2}\]</span></p>
+<p><strong>Manhattan distance</strong> (L₁ norm): <span class="math display">\[d(i,j) = \\sum_{f=1}^{p}|x_{if} - x_{jf}|\]</span></p>
+<p><strong>Minkowski distance</strong> (Lₕ norm): <span class="math display">\[d(i,j) = \\left(\\sum_{f=1}^{p}|x_{if} - x_{jf}|^h\\right)^{1/h}\]</span></p>
+<p><strong>Supremum distance</strong> (L∞): <span class="math display">\[d(i,j) = \\max_f |x_{if} - x_{jf}|\]</span></p>
+<p><strong>Metric properties</strong> (Euclidean &amp; Manhattan satisfy all): 1. Non-negativity: d(i,j) ≥ 0 2. Identity: d(i,i) = 0 3. Symmetry: d(i,j) = d(j,i) 4. Triangle inequality: d(i,j) ≤ d(i,k) + d(k,j)</p>
+<p>```python from scipy.spatial.distance import euclidean, cityblock, minkowski, chebyshev</p>
+<p>x, y = [1, 2, 3], [4, 6, 5] print(f”Euclidean: {euclidean(x, y):.2f}“) print(f”Manhattan: {cityblock(x, y):.2f}“) print(f”Minkowski (h=3): {minkowski(x, y, 3):.2f}“) print(f”Supremum: {chebyshev(x, y):.2f}“) ```</p>
+<p><strong>Weighted Euclidean</strong>: <span class="math display">\[d(i,j) = \\sqrt{\\sum_{f=1}^{p}w_f(x_{if} - x_{jf})^2}\]</span></p>
+</section>
+<section id="ordinal-attributes" class="level3">
+<h3 class="anchored" data-anchor-id="ordinal-attributes">Ordinal Attributes</h3>
+<p>Three-step process:</p>
+<ol type="1">
+<li><strong>Rank</strong>: Replace values with ranks <span class="math inline">\(r_{if} \\in \\{1, \\ldots, M_f\\}\)</span></li>
+<li><strong>Normalize</strong>: Map to [0,1] <span class="math display">\[z_{if} = \\frac{r_{if} - 1}{M_f - 1}\]</span></li>
+<li><strong>Compute distance</strong>: Use numeric distance measures on <span class="math inline">\(z_{if}\)</span></li>
+</ol>
+<p>```python from sklearn.preprocessing import OrdinalEncoder</p>
+</section>
+</section>
+<section id="example-satisfaction-levels" class="level1">
+<h1>Example: satisfaction levels</h1>
+<p>satisfaction = [[‘fair’], [‘excellent’], [‘good’], [‘excellent’]] encoder = OrdinalEncoder(categories=[[‘fair’, ‘good’, ‘excellent’]]) ranks = encoder.fit_transform(satisfaction).flatten()</p>
+</section>
+<section id="normalize-to-01" class="level1">
+<h1>Normalize to [0,1]</h1>
+<p>M = 3 # number of states z = (ranks) / (M - 1) print(f”Normalized: {z}“) ```</p>
+<section id="mixed-attribute-types" class="level3">
+<h3 class="anchored" data-anchor-id="mixed-attribute-types">Mixed Attribute Types</h3>
+<p><strong>Combined dissimilarity</strong>: <span class="math display">\[d(i,j) = \\frac{\\sum_{f=1}^{p} \\delta_{ij}^{(f)} d_{ij}^{(f)}}{\\sum_{f=1}^{p} \\delta_{ij}^{(f)}}\]</span></p>
+<p><strong>Indicator</strong> <span class="math inline">\(\\delta_{ij}^{(f)} = 0\)</span> if: - Either value is missing, OR - Both values are 0 for asymmetric binary</p>
+<p><strong>Contribution</strong> <span class="math inline">\(d_{ij}^{(f)}\)</span>: - <strong>Numeric</strong>: <span class="math inline">\(\\frac{|x_{if} - x_{jf}|}{\\max_h x_{hf} - \\min_h x_{hf}}\)</span> - <strong>Nominal/Binary</strong>: 0 if match, 1 if mismatch - <strong>Ordinal</strong>: Treat as numeric after normalization</p>
+<p>```python def mixed_dissimilarity(obj1, obj2, attr_types, ranges): ““” attr_types: list of ‘numeric’, ‘nominal’, ‘ordinal’, ‘binary’ ranges: dict with normalization ranges for numeric attributes ““” total_delta = 0 weighted_sum = 0</p>
+<pre><code>for i, (v1, v2, atype) in enumerate(zip(obj1, obj2, attr_types)):
+    if pd.isna(v1) or pd.isna(v2):
+        continue
+    
+    delta = 1
+    if atype == 'numeric':
+        d = abs(v1 - v2) / ranges[i]
+    elif atype in ['nominal', 'binary']:
+        d = 0 if v1 == v2 else 1
+    else:  # ordinal (pre-normalized)
+        d = abs(v1 - v2)
+    
+    weighted_sum += delta * d
+    total_delta += delta
+
+return weighted_sum / total_delta if total_delta &gt; 0 else 0</code></pre>
+<p>```</p>
+</section>
+<section id="cosine-similarity" class="level3">
+<h3 class="anchored" data-anchor-id="cosine-similarity">Cosine Similarity</h3>
+<p>For sparse, high-dimensional vectors (documents, term-frequency):</p>
+<p><span class="math display">\[\\text{sim}(x,y) = \\frac{x \\cdot y}{||x|| \\cdot ||y||}\]</span></p>
+<p>where <span class="math inline">\(||x|| = \\sqrt{x_1^2 + x_2^2 + \\cdots + x_p^2}\)</span></p>
+<p><strong>Range</strong>: [0, 1] - 0 = orthogonal (no similarity) - 1 = identical direction (maximum similarity)</p>
+<p><strong>Tanimoto coefficient</strong> (binary variation): <span class="math display">\[\\text{sim}(x,y) = \\frac{x \\cdot y}{x \\cdot x + y \\cdot y - x \\cdot y}\]</span></p>
+<p>```python from sklearn.metrics.pairwise import cosine_similarity</p>
+</section>
+</section>
+<section id="document-term-frequency-vectors" class="level1">
+<h1>Document term-frequency vectors</h1>
+<p>doc1 = [5, 0, 3, 0, 2, 0, 0, 2, 0, 0] doc2 = [3, 0, 2, 0, 1, 1, 0, 1, 0, 1]</p>
+<p>sim = cosine_similarity([doc1], [doc2])[0][0] print(f”Cosine similarity: {sim:.4f}“) ```</p>
+<p>```{note} Cosine similarity is a <strong>non-metric</strong> measure—it doesn’t satisfy all metric properties but is highly effective for sparse data. ```</p>
+<hr>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>```{important} ### Key Takeaways</p>
+<ol type="1">
+<li><strong>Match measure to attribute type</strong>
+<ul>
+<li>Nominal → Mode</li>
+<li>Ordinal → Mode, Median</li>
+<li>Numeric → Mean, Median, Mode</li>
+</ul></li>
+<li><strong>Visualize before analyzing</strong>
+<ul>
+<li>Plots reveal patterns, outliers, distributions</li>
+<li>Multiple views provide different insights</li>
+</ul></li>
+<li><strong>Choose appropriate distance</strong>
+<ul>
+<li>Euclidean: Dense continuous data</li>
+<li>Manhattan: Grid-like spaces, robust to outliers</li>
+<li>Jaccard: Sparse binary data</li>
+<li>Cosine: High-dimensional sparse vectors (documents)</li>
+</ul></li>
+<li><strong>Handle outliers strategically</strong>
+<ul>
+<li>Use robust measures (median, IQR)</li>
+<li>Apply trimming or winsorizing</li>
+<li>Consider transformation (log, sqrt)</li>
+</ul></li>
+<li><strong>Consider data characteristics</strong>
+<ul>
+<li>Symmetric vs asymmetric</li>
+<li>Discrete vs continuous</li>
+<li>Sparse vs dense</li>
+<li>Scale differences → normalize ```</li>
+</ul></li>
+</ol>
+<hr>
+</section>
+<section id="further-reading" class="level2">
+<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
+<ul>
+<li><strong>Statistical measures</strong>: Tukey’s “Exploratory Data Analysis” (1977)</li>
+<li><strong>Visualization</strong>: Tufte’s “The Visual Display of Quantitative Information” (2001)</li>
+<li><strong>Distance metrics</strong>: Deza &amp; Deza’s “Encyclopedia of Distances” (2009)</li>
+<li><strong>Modern tools</strong>: seaborn, plotly, altair for Python; ggplot2 for R</li>
+</ul>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
