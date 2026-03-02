@@ -2,10 +2,16 @@ version: 1
 
 site:
   template: book-theme
-  base_url: /KDDM
+  nav: []
+  actions:
+  - title: KDDM
+    url: https://maciejskorski.github.io/KDDM/
+  options:
+    base_url: /KDDM
+
 
 project:
-  title: Data Mining and Knowledge Discovery
+  title: Knowledge Discovery and Data Mining
   authors:
     - name: Maciej Skorski
   toc:
