@@ -1,0 +1,29 @@
+## Knowledge Discovery from Data Process
+
+{cite}`fayyad1996kdd` framed knowledge discovery as a sequential pipeline —
+select, clean, transform, mine, interpret — with limited feedback between steps.
+
+:::{figure} https://www2.cs.uregina.ca/~dbd/cs831/notes/kdd/kdd.gif
+:name: fig-kdd-process
+:width: 85%
+
+The KDD pipeline {cite}`fayyad1996kdd`.
+:::
+
+:::{note}
+**Limitations of the classical KDD Model**
+
+The model is influential but data-centric and rigid {cite}`hofmann2003kdp`: it lacks
+business perspective, skips deployment, and has no inner iteration loops.
+:::
+
+:::{figure} https://datasolut.com/wp-content/uploads/2019/11/CRISP-DM.png
+:name: fig-crisp-dm
+:width: 85%
+
+The CRISP-DM process model — the industry standard successor to KDD.
+:::
+
+:::{seealso}
+For a comprehensive survey of KDD process models and their evolution, see {cite}`rotondo2020evolution`.
+:::
