@@ -17,6 +17,8 @@ project:
   toc:
     - file: index.md
       title: About
+    - file: chapters/section2/part1.md
+      title: KDD Process
     - file: chapters/section2/part2.md
       title: Know Thy Data
       children:
